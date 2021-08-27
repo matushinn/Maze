@@ -63,7 +63,24 @@ public class Blocks {
 
 	public void Init(Dictionary<string,int[]> objPositions)
 	{
+		//int配列にして読み込む
+		int[] mapv = PlayerPrefs.GetString(prefsName).Split(',').Where(s => s.Length != 0).Select(s => int.Parse(s)).ToArray();
+		//ブロックの復活
+        foreach (var item in blocks.Select((v, i) => new { v, i }))
+        {
+			//indexの計算
+            int x = i2x(item.i);
+            int z = i2z(item.i);
 
+			//objPositionsのstart,goal,player,enemyの位置と被っているか否か？
+            bool b0 = objPositions.Any(i => i.Value[0] == x && i.Value[1] == z) == false;
+			//b0かつmapvが-1(壁作成)ならば、createBlock
+            bool b1 = b0 && (item.i < mapv.Length ? mapv[item.i] == -1 : false);
+            if (b1)
+            {
+                CreateBlock(x, z);
+            }
+        }
 	}
 
 	//インデックスから横と縦を計算する
@@ -120,7 +137,7 @@ public class Blocks {
         remap = true;
         if (save)
         {
-            //SavePrefs();
+            SavePrefs();
         }
     }
 	
@@ -148,8 +165,51 @@ public class Blocks {
         remap = true;
         if (save)
         {
-            //SavePrefs();
+            SavePrefs();
         }
     }
-	
+
+	public void SavePrefs()
+    {
+        GetMap();
+		//一つのstringとして保存　例:"1,-1,1"
+        PlayerPrefs.SetString(prefsName, string.Join(",", map.Select(x => x.ToString()).ToArray()));
+        PlayerPrefs.Save();
+    }
+    public void DeletePrefs()
+    {
+        PlayerPrefs.DeleteKey(prefsName);
+    }
+
+    public int[] GetMap()
+    {
+        if (remap)
+        {
+			//indexを使えるforeach
+            foreach (var item in blocks.Select((v, i) => new { v, i }))
+            {
+				//blockがない場合1,ある場合-1でmapを更新する
+                map[xz2i(item.v.X, item.v.Z)] = (item.v.Block == null ? 1 : -1);
+            }
+            remap = false;
+        }
+        return map;
+    }
+	//全てのブロックに関して、メソッドfを実行する
+	public bool All(System.Func<int, int, bool> f)
+    {
+        return blocks.Select((v, i) => new { v, i }).All(item => { return f(i2x(item.i), i2z(item.i)); });
+    }
+	//index x,zがmapの範囲内であるかどうかの判定の関数
+    public bool IsIn(int x, int z)
+    {
+        return x >= 0 && x < width && z >= 0 && z < height;
+    }
+	//x,zの壁があるかの判定
+    public bool IsWall(int x, int z)
+    {
+        GetMap();
+        return IsIn(x, z) == false || map[xz2i(x, z)] == -1;
+    }
+
 }
