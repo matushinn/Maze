@@ -20,6 +20,11 @@ public class Floor: MonoBehaviour {
 
 	//floorのポジションの配列
 	Dictionary<string,int[]> objPositions = new Dictionary<string,int[]>();
+
+	//playerPrefabの保存場所
+	public GameObject playerPrefab;
+	//スクリプト内で使うための変数
+	GameObject player;
 	
 	// Use this for initialization
 	void Start () {
@@ -65,8 +70,46 @@ public class Floor: MonoBehaviour {
         }
         blockPreb.GetComponent<Transform>().localScale = scale;
 
+		//player,enemy
+		new string[] {playerName,enemyName}.Select((v,i) => new {v,i}).All(
+			item =>
+			{
+				GameObject obj = Instantiate(playerPrefab);
+				obj.name = item.v;
+				Transform transform = obj.GetComponent<Transform>();
+				Vector3 p = blocks.GetBlockPosition(objPositions[item.v][0], objPositions[item.v][1]);
+				//y軸だけは自前で計算、スライドあり
+                p.y = floor.localScale.y / 2f + floor.position.y + transform.localScale.y * transform.Find("Body").localScale.y / 2f;
+                transform.position = p;
+                PlayerCellController ctrl = obj.GetComponent<PlayerCellController>();
+
+				//player専用の処理
+				if (item.v == playerName)
+				{
+					player = obj;
+					//自動的に移動する距離(0は移動しない)
+                    //ctrl.AutoMovingSpan = 0f;
+				}
+				else if (item.v == enemyName)
+				{
+					//ctrl.AutoMovingSpan = 5f;
+                    //ctrl.SetColor(new Color32(165, 35, 86, 255));
+
+					
+				}
+				return true;
+			}
+		);
+
 
 	}
+	//player,enemyの現在の位置を取得できる管理する関数、中で変数の中身を上書きしていく。
+	public void UpdateObjPosition(string name, Vector3 pos, Quaternion rot)
+    {
+        int[] index = blocks.GetBlockIndexXZ(pos);
+		
+        objPositions[name] = index;
+    }
 	
 	// Update is called once per frame
 	void Update () {
