@@ -32,6 +32,10 @@ public class Floor: MonoBehaviour {
 	Camera playersEye;
 	//開始時点でのどちらの視点のカメラなのかの保持
 	public bool start_bird_view;
+
+	//timertext保存の変数
+	GameObject timerText;
+	float timer = 0;
 	
 	// Use this for initialization
 	void Start () {
@@ -96,6 +100,21 @@ public class Floor: MonoBehaviour {
 					player = obj;
 					//自動的に移動する距離(0は移動しない)
                     ctrl.AutoMovingSpan = 0f;
+					//Goalに当たった時の処理
+					ctrl.AddTriggerAction(goalName, () => {
+						//全てのモーションをキャンセル
+                        ctrl.CancelMotions();
+                        //dlg.DoModal(name => { }, timer.ToString("0.0"));
+                        timer = 0.0f;
+
+						//初期値にpositionを戻す
+                        transform.position = blocks.GetBlockPosition(objPositions[startName][0], objPositions[startName][1]);
+						//向いている向きも初期状態に戻す
+                        transform.localRotation = Quaternion.identity;
+
+                        //audio_source_effects.PlayOneShot(audio_goal);
+                    });
+
 				}
 				else if (item.v == enemyName)
 				{
@@ -120,6 +139,10 @@ public class Floor: MonoBehaviour {
 		{
 			ChangeCamera();
 		}
+		
+		//timertextの更新
+		timerText = GameObject.Find("TimerText");
+
 	}
 
 	void SetPlayerActionType()
@@ -149,48 +172,46 @@ public class Floor: MonoBehaviour {
 		if (birdEye.enabled == true)
 		{
 			//左右のマウスクリックを同時にチェックする
-		int i = Enumerable.Range(1, 2).FirstOrDefault(v => Input.GetMouseButtonDown(v - 1));
-		//どちらかのマウスがクリックされていたら？
-		if (i != 0)
-		{
-			/*
-			Rayがブロックに当たる場合は、そのブロックを削除する。
-			Rayが床に当たる場合は、その場所にブロックを作成する。
-			*/
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            RaycastHit hit = new RaycastHit();
-			
-			/*
-			ray.origin rayのスタート場所(カメラの場所)
-			ray.direction マウスのポジションの方向に向かっていく。
-			hit ここにどのオブジェクトがヒットしたのか？
-			Mathf.Infinity rayの長さで無限大の長さでrayを発射する。
-			*/
-			//rayが何かしらのオブジェクトに当たった場合
-			
-			if (Physics.Raycast(ray.origin, ray.direction, out hit, Mathf.Infinity))
+			int i = Enumerable.Range(1, 2).FirstOrDefault(v => Input.GetMouseButtonDown(v - 1));
+			//どちらかのマウスがクリックされていたら？
+			if (i != 0)
 			{
-				//blocksの一覧に衝突したgameObjectがあるかどうか、そのブロックをtargetに保存
-				Blocks.BlockObj target = blocks.Find(hit.collider.gameObject);
-				//ブロックにぶつかり、右クリックの場合は削除
-				if (i == 2 && target != null)
-				{
-					blocks.RemoveBlock(target);
-				}
-				//floorのgameObjectと衝突したものが同じだった場合 
-				else if (i == 1 && gameObject == hit.collider.gameObject)
-				{
-					//hit.pointを変換して、そこにブロックを作る。
-					int[] index = blocks.GetBlockIndexXZ(hit.point);
-					blocks.CreateBlock(index[0],index[1]);
-				}
+				/*
+				Rayがブロックに当たる場合は、そのブロックを削除する。
+				Rayが床に当たる場合は、その場所にブロックを作成する。
+				*/
+				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+				RaycastHit hit = new RaycastHit();
 				
+				/*
+				ray.origin rayのスタート場所(カメラの場所)
+				ray.direction マウスのポジションの方向に向かっていく。
+				hit ここにどのオブジェクトがヒットしたのか？
+				Mathf.Infinity rayの長さで無限大の長さでrayを発射する。
+				*/
+				//rayが何かしらのオブジェクトに当たった場合
+				
+				if (Physics.Raycast(ray.origin, ray.direction, out hit, Mathf.Infinity))
+				{
+					//blocksの一覧に衝突したgameObjectがあるかどうか、そのブロックをtargetに保存
+					Blocks.BlockObj target = blocks.Find(hit.collider.gameObject);
+					//ブロックにぶつかり、右クリックの場合は削除
+					if (i == 2 && target != null)
+					{
+						blocks.RemoveBlock(target);
+					}
+					//floorのgameObjectと衝突したものが同じだった場合 
+					else if (i == 1 && gameObject == hit.collider.gameObject)
+					{
+						//hit.pointを変換して、そこにブロックを作る。
+						int[] index = blocks.GetBlockIndexXZ(hit.point);
+						blocks.CreateBlock(index[0],index[1]);
+					}	
+				}
 			}
 		}
-			
-		}
-			
-		
+		timer += Time.deltaTime;
+		timerText.GetComponent<Text>().text = timer.ToString("0.0");
 	}
 }
