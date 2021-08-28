@@ -88,12 +88,12 @@ public class Floor: MonoBehaviour {
 				{
 					player = obj;
 					//自動的に移動する距離(0は移動しない)
-                    //ctrl.AutoMovingSpan = 0f;
+                    ctrl.AutoMovingSpan = 0f;
 				}
 				else if (item.v == enemyName)
 				{
-					//ctrl.AutoMovingSpan = 5f;
-                    //ctrl.SetColor(new Color32(165, 35, 86, 255));
+					ctrl.AutoMovingSpan = 5f;
+                    ctrl.SetColor(new Color32(165, 35, 86, 255));
 
 					
 				}
