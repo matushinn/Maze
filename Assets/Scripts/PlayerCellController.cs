@@ -34,6 +34,9 @@ public class PlayerCellController : MonoBehaviour {
 	Floor floor;
 	PlayerMotion pmotion;
 
+	//dialogのフラグ
+	ModalDialog dlg;
+
 	public float AutoMovingSpan {get; set;}
 	//前に移動してから何秒たったか？
 	float autoMovedTime = 0f;
@@ -63,11 +66,17 @@ public class PlayerCellController : MonoBehaviour {
 
 		floor = GameObject.Find("Floor").GetComponent<Floor>();
 		pmotion = GetComponent<PlayerMotion>();
+
+		dlg = GameObject.Find("Canvas").GetComponent<ModalDialog>();
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (dlg.Active == true)
+        {
+            return;
+        }
 		if (AutoMovingSpan == 0)
 		{
 			foreach (var elem in actions)

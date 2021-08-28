@@ -55,6 +55,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Blocks.cs" />
      <Compile Include="Assets\Scripts\Floor.cs" />
+     <Compile Include="Assets\Scripts\ModalDialog.cs" />
      <Compile Include="Assets\Scripts\PlayerCellController.cs" />
      <Compile Include="Assets\Scripts\PlayerMotion.cs" />
  <Reference Include="UnityEditor.StandardEvents">

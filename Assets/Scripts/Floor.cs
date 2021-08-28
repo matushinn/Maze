@@ -36,6 +36,27 @@ public class Floor: MonoBehaviour {
 	//timertext保存の変数
 	GameObject timerText;
 	float timer = 0;
+
+	//modalDialogのフラグ
+	ModalDialog dlg;
+
+
+	Coroutine timerColor = null;
+	//c0,c1がtimeで切り替わる
+	IEnumerator TimerColor(Color c0, Color c1, float time)
+    {
+        int div = 10;
+        for (int cnt = 0; cnt < div; cnt++)
+        {
+			//1/10ずつ色が変化する
+            float r = (float)cnt / (div - 1);
+            Color c = c0 * (1 - r) + c1 * r;
+            timerText.GetComponent<Text>().color = c;
+            yield return new WaitForSeconds(time / div);
+        }
+        timerColor = null;
+    }
+
 	
 	// Use this for initialization
 	void Start () {
@@ -104,7 +125,8 @@ public class Floor: MonoBehaviour {
 					ctrl.AddTriggerAction(goalName, () => {
 						//全てのモーションをキャンセル
                         ctrl.CancelMotions();
-                        //dlg.DoModal(name => { }, timer.ToString("0.0"));
+						//ダイアログの表示
+                        dlg.DoModal(name => { }, timer.ToString("0.0"));
                         timer = 0.0f;
 
 						//初期値にpositionを戻す
@@ -114,6 +136,18 @@ public class Floor: MonoBehaviour {
 
                         //audio_source_effects.PlayOneShot(audio_goal);
                     });
+
+					//敵と衝突した時の処理
+					ctrl.AddTriggerAction(enemyName, () => {
+						timer += 5.0f;
+
+						if (timerColor != null)
+						{
+							StopCoroutine(timerColor);
+						}
+						//red~blackに5fで戻っていく
+						timerColor = StartCoroutine(TimerColor(Color.red,Color.black, 5f));
+					});
 
 				}
 				else if (item.v == enemyName)
@@ -143,6 +177,9 @@ public class Floor: MonoBehaviour {
 		//timertextの更新
 		timerText = GameObject.Find("TimerText");
 
+		//dialogの初期化
+		dlg = GameObject.Find("Canvas").GetComponent<ModalDialog>();
+
 	}
 
 	void SetPlayerActionType()
@@ -168,6 +205,10 @@ public class Floor: MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+		if (dlg.Active == true)
+		{
+			return;
+		}
 		//俯瞰視点の場合
 		if (birdEye.enabled == true)
 		{
