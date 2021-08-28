@@ -25,6 +25,13 @@ public class Floor: MonoBehaviour {
 	public GameObject playerPrefab;
 	//スクリプト内で使うための変数
 	GameObject player;
+
+	//俯瞰視点用のカメラを保存する変数
+	Camera birdEye;
+	//Player視点のカメラを保存する変数
+	Camera playersEye;
+	//開始時点でのどちらの視点のカメラなのかの保持
+	public bool start_bird_view;
 	
 	// Use this for initialization
 	void Start () {
@@ -101,7 +108,31 @@ public class Floor: MonoBehaviour {
 			}
 		);
 
+		//視点カメラの登録
+		birdEye = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
+		birdEye.enabled = false;
+		playersEye = player.GetComponent<Transform>().Find("Camera").GetComponent<Camera>();
+		playersEye.enabled = true;
+		//視点が変わった時に、それに適した動作方法を設定する
+		SetPlayerActionType();
+		//フラグがtrueならカメラの視点を変える
+		if (start_bird_view == true)
+		{
+			ChangeCamera();
+		}
+	}
 
+	void SetPlayerActionType()
+	{
+		//birdEye true 0 flase 1
+		player.GetComponent<PlayerCellController>().ActionType = birdEye.enabled ? 0:1;
+	}
+	//カメラの視点を変えて,actiontypeも設定する関数
+	public void ChangeCamera()
+	{
+		birdEye.enabled = !birdEye.enabled;
+		playersEye.enabled = !playersEye.enabled;
+		SetPlayerActionType();
 	}
 	//player,enemyの現在の位置を取得できる管理する関数、中で変数の中身を上書きしていく。
 	public void UpdateObjPosition(string name, Vector3 pos, Quaternion rot)
@@ -112,9 +143,12 @@ public class Floor: MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
-		
-		//左右のマウスクリックを同時にチェックする
+	void Update () 
+	{
+		//俯瞰視点の場合
+		if (birdEye.enabled == true)
+		{
+			//左右のマウスクリックを同時にチェックする
 		int i = Enumerable.Range(1, 2).FirstOrDefault(v => Input.GetMouseButtonDown(v - 1));
 		//どちらかのマウスがクリックされていたら？
 		if (i != 0)
@@ -154,5 +188,9 @@ public class Floor: MonoBehaviour {
 				
 			}
 		}
+			
+		}
+			
+		
 	}
 }

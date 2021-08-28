@@ -43,7 +43,7 @@ public class PlayerCellController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		ActionType = 0;
+		//ActionType = 0;
 
 		floor = GameObject.Find("Floor").GetComponent<Floor>();
 		pmotion = GetComponent<PlayerMotion>();
@@ -115,7 +115,7 @@ public class PlayerCellController : MonoBehaviour {
                 int y = Mathf.RoundToInt((q.eulerAngles.y - GetComponent<Transform>().eulerAngles.y)) % 360;
                 if (y != 0)
                 {
-					//角度を補正する
+					//角度を補正する 修正
                     Turn(NormalizedDegree(y), null);
                 }
 			}else
@@ -181,5 +181,10 @@ public class PlayerCellController : MonoBehaviour {
 	float RoundDegree(float deg)
 	{
 		return Mathf.FloorToInt((deg + 45) / 90) * 90;
+	}
+	//playermotionの全てをキャンセルできる関数
+	public void CancelMotions()
+	{
+		pmotion.Cancel();
 	}
 }
