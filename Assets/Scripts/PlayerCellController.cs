@@ -43,6 +43,15 @@ public class PlayerCellController : MonoBehaviour {
 	//speedUpできるために予めに保存しておく
 	float autoMovingSpeed = 1.0f;
 
+	//BGM
+	public AudioClip audio_wallk;
+	public AudioClip audio_turn;
+	public AudioClip audio_hit_wall;
+	public float volume = 0.1f;
+	//三つの音を管理するための連想配列
+	Dictionary<string,AudioClip> sounds;
+	AudioSource audio_source;
+
 	//どのオブジェクトに当たって(string),どの関数を呼び出すか(Action)
 	Dictionary<string,Action> triggerActions = new Dictionary<string,Action>();
 
@@ -52,7 +61,7 @@ public class PlayerCellController : MonoBehaviour {
 	}
 
 	private void OnTriggerEnter(Collider other)
-	{
+	{ 
 		if (triggerActions.ContainsKey(other.name))
 		{
 			triggerActions[other.name]();
@@ -62,12 +71,20 @@ public class PlayerCellController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		//ActionType = 0;
+		ActionType = 1;
 
 		floor = GameObject.Find("Floor").GetComponent<Floor>();
 		pmotion = GetComponent<PlayerMotion>();
 
 		dlg = GameObject.Find("Canvas").GetComponent<ModalDialog>();
+
+		audio_source = gameObject.AddComponent<AudioSource>();
+		sounds = new Dictionary<string,AudioClip>(){
+			{"wallk", audio_wallk },
+			{"turn", audio_turn },
+			{"hit_wall", audio_hit_wall },
+		};
+
 		
 	}
 	
@@ -186,7 +203,13 @@ public class PlayerCellController : MonoBehaviour {
             {
 				//割合分ポジションを変えていく
                 GetComponent<Transform>().position = (pos1 - pos0) * p + pos0;
-            }, 0.5f, aniComplete);
+            }, 0.5f, aniComplete,sounds["wallk"],volume);
+		}
+		//壁にぶつかる場合
+		else
+		{
+			audio_source.PlayOneShot(sounds["hit_wall"],volume);
+
 		}
 	}
 	//回転する角度、終了時のメソッドを引数に持つ
@@ -200,7 +223,7 @@ public class PlayerCellController : MonoBehaviour {
         {
 			//割合分角度を変えていく
             GetComponent<Transform>().rotation = Quaternion.Euler(0f, (deg1 - deg0) * p + deg0, 0f);
-        }, 0.5f, aniComplete);
+        }, 0.5f, aniComplete,sounds["turn"],volume);
 	}
 	//90度の角度に補正する関数
 	float RoundDegree(float deg)

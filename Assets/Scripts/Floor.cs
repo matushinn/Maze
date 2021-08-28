@@ -5,6 +5,25 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Floor: MonoBehaviour {
+	//効果音の変数
+	//bgm
+	public AudioClip audio_bgm;
+	public AudioClip audio_bird;
+	public AudioClip audio_navi;
+	public AudioClip audio_warning;
+	public AudioClip audio_distance;
+	public float volume_bgm;
+	Dictionary<string,AudioClip> audio_bgms;
+	string currentBGM = "";
+	AudioSource audio_source_bgm;
+
+	//効果音
+	public AudioClip audio_goal;
+	public AudioClip audio_break;
+	public AudioClip audio_damage;
+	public float volume_effects;
+	AudioSource audio_source_effects;
+
 
 	public GameObject blockPreb;
 	public Blocks blocks;
@@ -39,6 +58,9 @@ public class Floor: MonoBehaviour {
 
 	//modalDialogのフラグ
 	ModalDialog dlg;
+
+	//routeRendererの変数
+	RouteRenderer routeRenderer;
 
 
 	Coroutine timerColor = null;
@@ -134,7 +156,7 @@ public class Floor: MonoBehaviour {
 						//向いている向きも初期状態に戻す
                         transform.localRotation = Quaternion.identity;
 
-                        //audio_source_effects.PlayOneShot(audio_goal);
+                        audio_source_effects.PlayOneShot(audio_goal);
                     });
 
 					//敵と衝突した時の処理
@@ -147,6 +169,8 @@ public class Floor: MonoBehaviour {
 						}
 						//red~blackに5fで戻っていく
 						timerColor = StartCoroutine(TimerColor(Color.red,Color.black, 5f));
+						//衝撃音
+						audio_source_effects.PlayOneShot(audio_damage);
 					});
 
 				}
@@ -175,11 +199,42 @@ public class Floor: MonoBehaviour {
 		}
 		
 		//timertextの更新
-		timerText = GameObject.Find("TimerText");
+		timerText = GameObject.Find("timerText");
 
 		//dialogの初期化
 		dlg = GameObject.Find("Canvas").GetComponent<ModalDialog>();
 
+		audio_source_effects = gameObject.AddComponent<AudioSource>();
+		audio_source_effects.volume = volume_effects;
+		audio_source_bgm = gameObject.AddComponent<AudioSource>();
+		audio_source_bgm.loop = true;
+		audio_source_bgm.volume = volume_bgm;
+
+		audio_bgms = new Dictionary<string,AudioClip>()
+		{
+			{"Default",audio_bgm},
+			{"Bird",audio_bird},
+			{"Navi",audio_navi},
+			{"Warning",audio_warning},
+			{"Distance",audio_distance},
+		};
+		BGM("Default");
+
+		//routeRendererの初期化
+		routeRenderer = gameObject.AddComponent<RouteRenderer>();
+	}
+	public void BGM(string type)
+	{
+		if (audio_source_bgm.clip != audio_bgms[type])
+		{
+			currentBGM = type;
+			audio_source_bgm.clip = audio_bgms[type];
+			audio_source_bgm.Play();
+		}
+	}
+	public string BGM()
+	{
+		return currentBGM;
 	}
 
 	void SetPlayerActionType()
@@ -209,6 +264,14 @@ public class Floor: MonoBehaviour {
 		{
 			return;
 		}
+		//経路検索のための配列
+		//playerからgoalまでのroute
+		/*
+		List<int> route = blocks.Solve(blocks.xz2i(objPositions[playerName]), blocks.xz2i(objPositions[goalName]));
+		routeRenderer.Render(route, i => blocks.GetBlockPosition(i));
+		*/
+
+
 		//俯瞰視点の場合
 		if (birdEye.enabled == true)
 		{

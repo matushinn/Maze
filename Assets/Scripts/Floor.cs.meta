@@ -3,7 +3,19 @@ guid: 8d79a2af5d4d14c6c80d4e2b5ca9b7f4
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - audio_bgm: {fileID: 8300000, guid: afb12289204f9405bb72e64992cb6e07, type: 3}
+  - audio_bird: {fileID: 8300000, guid: 71dfd7023a218492e963005a24bdeaac, type: 3}
+  - audio_navi: {fileID: 8300000, guid: b1e2888f17ea5423da8a1a22f00cb617, type: 3}
+  - audio_warning: {fileID: 8300000, guid: 7b24227960efc4c3598459e5879e4b29, type: 3}
+  - audio_distance: {fileID: 8300000, guid: d1178db4da7664f4e8c21828f940c0d0, type: 3}
+  - audio_goal: {fileID: 8300000, guid: ff4b0b6d3008c4831aff71debc8c2156, type: 3}
+  - audio_break: {fileID: 8300000, guid: 802f3e4a883744401af6d206fa4be6b6, type: 3}
+  - audio_damage: {fileID: 8300000, guid: 7289f9fcfeea34945817323933842547, type: 3}
+  - blockPreb: {fileID: 1270972680217284, guid: 08b795796d56c4372ae69d6bfa6d6142,
+      type: 3}
+  - playerPrefab: {fileID: 1068835700076238, guid: cb8afa5f4ca364938b6503ea09647d0c,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -10,11 +10,17 @@ public class PlayerMotion : MonoBehaviour {
 		public Action Complete { get; set; }
 		Action<float> animate;
 
-		public Animation(Action<float> a,float d,Action c = null)
+		//アニメーションの動きとBGMを合わせるためPlayerMotionクラスに格納
+		public AudioClip Sound {get; set;}
+		public float Volume {get; set;}
+
+		public Animation(Action<float> a,float d,Action c = null,AudioClip sound = null,float volume = 0)
 		{
 			this.animate = a;
 			this.Duration = d;
 			this.Complete = c;
+			this.Sound = sound;
+			this.Volume = volume;
 		}
 
 		//引数p(全体の何％終わったのか),
@@ -33,11 +39,13 @@ public class PlayerMotion : MonoBehaviour {
 	List<Animation> animations = new List<Animation>();
 	//アニメーションが始まった時間
 	float started_time = 0;
+	//音を鳴らすためのaudio_source
+	AudioSource audio_source;
 
 	//いろいろな形でPlayerMotionにアニメーションを登録することができる
-	public void Add(Action<float> animate, float duration, Action complete = null)
+	public void Add(Action<float> animate, float duration, Action complete = null,AudioClip sound = null,float volume = 0)
 	{
-		Add(new Animation(animate,duration,complete));
+		Add(new Animation(animate,duration,complete,sound,volume));
 	}
 
 	public void Add(Animation[] anis)
@@ -74,7 +82,7 @@ public class PlayerMotion : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		audio_source = gameObject.AddComponent<AudioSource>();
 	}
 	
 	// Update is called once per frame
@@ -85,6 +93,11 @@ public class PlayerMotion : MonoBehaviour {
 			{
 				//Unityをスタートした時間をコピーする
 				started_time = Time.realtimeSinceStartup;
+				//音を鳴らす
+				if (animations[0].Sound != null)
+				{
+					audio_source.PlayOneShot(animations[0].Sound,animations[0].Volume);
+				}
 
 			}
 			//どこまでアニメーションが進んだかの割合の計算
